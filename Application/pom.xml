@@ -47,6 +47,9 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+        <mainClass>com.railse.hiring.worforcemgmt.Application</mainClass>
+      </configuration>
 			</plugin>
 		</plugins>
 	</build>
