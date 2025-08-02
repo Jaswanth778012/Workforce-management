@@ -6,15 +6,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.railse.hiring.worforcemgmt.common.model.enums.Priority;
 import com.railse.hiring.workforcemgmt.common.model.response.Response;
 import com.railse.hiring.workforcemgmt.dto.AssignByRefferenceRequest;
 import com.railse.hiring.workforcemgmt.dto.TaskCreateRequest;
 import com.railse.hiring.workforcemgmt.dto.TaskFetchByDataRequest;
 import com.railse.hiring.workforcemgmt.dto.TaskManagementDto;
+import com.railse.hiring.workforcemgmt.dto.TaskPriorityUpdateRequest;
 import com.railse.hiring.workforcemgmt.dto.UpdateTaskRequest;
 import com.railse.hiring.workforcemgmt.service.TaskManagementService;
 
@@ -61,6 +64,7 @@ public class TaskManagementController {
 	       return new Response<>(taskManagementService.fetchTasksByDate(request));
 	   }
 	   
+	   //Feature 1
 	   @PostMapping("/fetch-smart")
 	    public ResponseEntity<List<TaskManagementDto>> fetchSmartTasksByDate(@RequestBody TaskFetchByDataRequest request) {
 	        List<TaskManagementDto> tasks = taskManagementService.fetchSmartTasksByDate(request);
@@ -76,5 +80,19 @@ public class TaskManagementController {
 	   public Response<List<TaskManagementDto>> getTasksByAssignee(@PathVariable Long assigneeId) {
 	       return new Response<>(taskManagementService.getTasksByAssigneeId(assigneeId));
 	   }
+	   
+	   //Feature 2
+	   @PutMapping("/update-priority")
+	   public ResponseEntity<String> updateTaskPriority(@RequestBody TaskPriorityUpdateRequest request) {
+	       String response = taskManagementService.updateTaskPriority(request);
+	       return ResponseEntity.ok(response);
+	   }
+
+	   @GetMapping("/priority/{priority}")
+	   public ResponseEntity<List<TaskManagementDto>> getTasksByPriority(@PathVariable Priority priority) {
+	       List<TaskManagementDto> tasks = taskManagementService.getTasksByPriority(priority);
+	       return ResponseEntity.ok(tasks);
+	   }
+
 
 }

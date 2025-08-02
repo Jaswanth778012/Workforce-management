@@ -3,6 +3,7 @@ package com.railse.hiring.workforcemgmt.repository;
 import java.util.List;
 import java.util.Optional;
 
+import com.railse.hiring.worforcemgmt.common.model.enums.Priority;
 import com.railse.hiring.worforcemgmt.common.model.enums.ReferenceType;
 import com.railse.hiring.workforcemgmt.model.TaskManagement;
 
@@ -13,6 +14,8 @@ public interface TaskRepository {
 	   List<TaskManagement> findByReferenceIdAndReferenceType(Long referenceId, ReferenceType referenceType);
 	   List<TaskManagement> findByAssigneeIdIn(List<Long> assigneeIds);
 	   List<TaskManagement> findByAssigneeId(Long assigneeId);
+	   List<TaskManagement> findByPriority(Priority priority);
+
 
 	}
 

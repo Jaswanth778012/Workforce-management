@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.railse.hiring.worforcemgmt.common.model.enums.Priority;
 import com.railse.hiring.worforcemgmt.common.model.enums.Task;
 import com.railse.hiring.worforcemgmt.common.model.enums.TaskStatus;
 import com.railse.hiring.workforcemgmt.common.exception.ResourceNotFoundException;
@@ -14,6 +15,7 @@ import com.railse.hiring.workforcemgmt.dto.AssignByRefferenceRequest;
 import com.railse.hiring.workforcemgmt.dto.TaskCreateRequest;
 import com.railse.hiring.workforcemgmt.dto.TaskFetchByDataRequest;
 import com.railse.hiring.workforcemgmt.dto.TaskManagementDto;
+import com.railse.hiring.workforcemgmt.dto.TaskPriorityUpdateRequest;
 import com.railse.hiring.workforcemgmt.dto.UpdateTaskRequest;
 import com.railse.hiring.workforcemgmt.mapper.ITaskManagementMapper;
 import com.railse.hiring.workforcemgmt.model.TaskManagement;
@@ -202,7 +204,7 @@ public class TaskManagementServiceImpl implements TaskManagementService {
 	   }
 
 
-
+	   //Feature 1
 	   @Override
 	   public List<TaskManagementDto> fetchSmartTasksByDate(TaskFetchByDataRequest request) {
 	       List<TaskManagement> tasks = taskRepository.findByAssigneeIdIn(request.getAssigneeIds());
@@ -237,6 +239,25 @@ public class TaskManagementServiceImpl implements TaskManagementService {
 	       List<TaskManagement> tasks = taskRepository.findByAssigneeId(assigneeId);
 	       return taskMapper.modelListToDtoList(tasks);
 	   }
+	   
+	   
+	   //Feature 2
+	   @Override
+	   public String updateTaskPriority(TaskPriorityUpdateRequest request) {
+	       TaskManagement task = taskRepository.findById(request.getTaskId())
+	           .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + request.getTaskId()));
+
+	       task.setPriority(request.getPriority());
+	       taskRepository.save(task);
+	       return "Task priority updated successfully.";
+	   }
+
+	   @Override
+	   public List<TaskManagementDto> getTasksByPriority(Priority priority) {
+	       List<TaskManagement> tasks = taskRepository.findByPriority(priority);
+	       return taskMapper.modelListToDtoList(tasks);
+	   }
+
 
 
 }

@@ -91,5 +91,13 @@ public class InMemoryTaskRepository implements TaskRepository{
 	               .filter(task -> task.getAssigneeId().equals(assigneeId))
 	               .collect(Collectors.toList());
 	   }
+	   
+	   @Override
+	   public List<TaskManagement> findByPriority(Priority priority) {
+	       return taskStore.values().stream()
+	               .filter(task -> task.getPriority() != null && task.getPriority().equals(priority))
+	               .collect(Collectors.toList());
+	   }
+
 
 }
