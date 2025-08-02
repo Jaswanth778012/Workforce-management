@@ -2,6 +2,7 @@ package com.railse.hiring.workforcemgmt.controller;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -59,6 +60,12 @@ public class TaskManagementController {
 	   public Response<List<TaskManagementDto>> fetchByDate(@RequestBody TaskFetchByDataRequest request) {
 	       return new Response<>(taskManagementService.fetchTasksByDate(request));
 	   }
+	   
+	   @PostMapping("/fetch-smart")
+	    public ResponseEntity<List<TaskManagementDto>> fetchSmartTasksByDate(@RequestBody TaskFetchByDataRequest request) {
+	        List<TaskManagementDto> tasks = taskManagementService.fetchSmartTasksByDate(request);
+	        return ResponseEntity.ok(tasks);
+	    }
 	   
 	   @GetMapping("/all")
 	   public Response<List<TaskManagementDto>> getAllTasks() {

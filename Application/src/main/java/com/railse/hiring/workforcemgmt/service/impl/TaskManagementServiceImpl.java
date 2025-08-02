@@ -143,8 +143,6 @@ public class TaskManagementServiceImpl implements TaskManagementService {
 	                   }
 	               }
 	           } else {
-	               System.out.println("No task assigned to target assignee yet for taskType: " + taskType);
-	               // Cancel all existing assigned tasks of this type
 	               for (TaskManagement task : tasksOfType) {
 	                   if (task.getStatus() == TaskStatus.ASSIGNED) {
 	                       System.out.println("Cancelling task id: " + task.getId());
@@ -153,8 +151,6 @@ public class TaskManagementServiceImpl implements TaskManagementService {
 	                       taskRepository.save(task);
 	                   }
 	               }
-	               // Assign new task to new assignee
-	               System.out.println("Assigning new task for taskType: " + taskType);
 	               TaskManagement newTask = new TaskManagement();
 	               newTask.setReferenceId(request.getReferenceId());
 	               newTask.setReferenceType(request.getReferenceType());
@@ -206,6 +202,26 @@ public class TaskManagementServiceImpl implements TaskManagementService {
 	   }
 
 
+
+	   @Override
+	   public List<TaskManagementDto> fetchSmartTasksByDate(TaskFetchByDataRequest request) {
+	       List<TaskManagement> tasks = taskRepository.findByAssigneeIdIn(request.getAssigneeIds());
+
+	       List<TaskManagement> filteredTasks = tasks.stream()
+	           .filter(task -> {
+	               if (task.getTaskDeadlineTime() == null) return false;
+
+	               boolean isActiveStatus = !(task.getStatus() == TaskStatus.CANCELLED || task.getStatus() == TaskStatus.COMPLETED);
+	               boolean deadlineInRange = task.getTaskDeadlineTime() >= request.getStartDate() &&
+	                                         task.getTaskDeadlineTime() <= request.getEndDate();
+	               boolean deadlineAfterRange = task.getTaskDeadlineTime() > request.getEndDate();
+
+	               return isActiveStatus && (deadlineInRange || deadlineAfterRange);
+	           })
+	           .collect(Collectors.toList());
+
+	       return taskMapper.modelListToDtoList(filteredTasks);
+	   }
 
 
 

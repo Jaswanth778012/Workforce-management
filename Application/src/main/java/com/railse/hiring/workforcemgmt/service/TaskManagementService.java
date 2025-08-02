@@ -16,5 +16,6 @@ public interface TaskManagementService {
 	   TaskManagementDto findTaskById(Long id);
 	   List<TaskManagementDto> findAllTasks();
 	   List<TaskManagementDto> getTasksByAssigneeId(Long assigneeId);
+	   List<TaskManagementDto> fetchSmartTasksByDate(TaskFetchByDataRequest request);
 
 }
