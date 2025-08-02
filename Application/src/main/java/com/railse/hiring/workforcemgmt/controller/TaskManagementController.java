@@ -1,0 +1,73 @@
+package com.railse.hiring.workforcemgmt.controller;
+
+import java.util.List;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.railse.hiring.workforcemgmt.common.model.response.Response;
+import com.railse.hiring.workforcemgmt.dto.AssignByRefferenceRequest;
+import com.railse.hiring.workforcemgmt.dto.TaskCreateRequest;
+import com.railse.hiring.workforcemgmt.dto.TaskFetchByDataRequest;
+import com.railse.hiring.workforcemgmt.dto.TaskManagementDto;
+import com.railse.hiring.workforcemgmt.dto.UpdateTaskRequest;
+import com.railse.hiring.workforcemgmt.service.TaskManagementService;
+
+@RestController
+@RequestMapping("/task-mgmt")
+public class TaskManagementController {
+
+
+	   private final TaskManagementService taskManagementService;
+
+
+	   public TaskManagementController(TaskManagementService taskManagementService) {
+	       this.taskManagementService = taskManagementService;
+	   }
+
+
+	   @GetMapping("/{id}")
+	   public Response<TaskManagementDto> getTaskById(@PathVariable Long id) {
+	       return new Response<>(taskManagementService.findTaskById(id));
+	   }
+
+
+	   @PostMapping("/create")
+	   public Response<List<TaskManagementDto>> createTasks(@RequestBody TaskCreateRequest request) {
+	       return new Response<>(taskManagementService.createTasks(request));
+	   }
+
+
+	   @PostMapping("/update")
+	   public Response<List<TaskManagementDto>> updateTasks(@RequestBody UpdateTaskRequest request) {
+	       return new Response<>(taskManagementService.updateTasks(request));
+	   }
+
+
+	   @PostMapping("/assign-by-ref")
+	   public Response<String> assignByReference(@RequestBody AssignByRefferenceRequest request) {
+	       return new Response<>(taskManagementService.assignByReference(request));
+	   }
+
+
+
+	   @PostMapping("/fetch-by-date/v2")
+	   public Response<List<TaskManagementDto>> fetchByDate(@RequestBody TaskFetchByDataRequest request) {
+	       return new Response<>(taskManagementService.fetchTasksByDate(request));
+	   }
+	   
+	   @GetMapping("/all")
+	   public Response<List<TaskManagementDto>> getAllTasks() {
+	       return new Response<>(taskManagementService.findAllTasks());
+	   }
+	   
+	   @GetMapping("/assignee/{assigneeId}")
+	   public Response<List<TaskManagementDto>> getTasksByAssignee(@PathVariable Long assigneeId) {
+	       return new Response<>(taskManagementService.getTasksByAssigneeId(assigneeId));
+	   }
+
+}
