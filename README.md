@@ -66,13 +66,15 @@ src/main/java/com/railse/workforcemgmt/
 
 ## 🚀 How to Run
 
-
+```bash
 # Clone the repository
 git clone https://github.com/your-username/railse-workforce-mgmt-api.git
 cd railse-workforce-mgmt-api
 
 # Build and run
 ./maven bootRun
+
+```
 
 ---
 🐞 Bug Fixes Implemented
@@ -83,6 +85,7 @@ Fix: Existing tasks are now marked as CANCELLED before assigning a new one.
 ✅ Bug 2: Cancelled Tasks Clutter the View
 Problem: The /fetch-by-date endpoint included cancelled tasks.
 Fix: Cancelled tasks are now excluded from fetch results.
+
 ---
 ✨ New Features
 🔍 Feature 1: Smart Daily Task View
@@ -120,12 +123,16 @@ Activity log (auto-generated)
 
 Comments (user-submitted)
 POST /task-mgmt/task/comment adding comment to task Id
+
 ---
+
 👨‍💻 Author
 Name: Pothina Venkata Sai Jaswanth Kumar
 Email: pothinajaswanthkumar@gmail.com
 GitHub: [github.com/Jaswanth778012]
+
 ---
+
 ✅ Submission Checklist
  Project set up using Spring Boot with proper structure
 
