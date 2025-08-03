@@ -1,6 +1,7 @@
 package com.railse.hiring.workforcemgmt.service.impl;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -8,6 +9,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import com.railse.hiring.worforcemgmt.common.model.enums.Priority;
+import com.railse.hiring.worforcemgmt.common.model.enums.ReferenceType;
 import com.railse.hiring.worforcemgmt.common.model.enums.Task;
 import com.railse.hiring.worforcemgmt.common.model.enums.TaskStatus;
 import com.railse.hiring.workforcemgmt.common.exception.ResourceNotFoundException;
@@ -18,7 +20,11 @@ import com.railse.hiring.workforcemgmt.dto.TaskManagementDto;
 import com.railse.hiring.workforcemgmt.dto.TaskPriorityUpdateRequest;
 import com.railse.hiring.workforcemgmt.dto.UpdateTaskRequest;
 import com.railse.hiring.workforcemgmt.mapper.ITaskManagementMapper;
+import com.railse.hiring.workforcemgmt.model.TaskActivityLog;
+import com.railse.hiring.workforcemgmt.model.TaskComment;
 import com.railse.hiring.workforcemgmt.model.TaskManagement;
+import com.railse.hiring.workforcemgmt.repository.TaskActivityLogRepository;
+import com.railse.hiring.workforcemgmt.repository.TaskCommentRepository;
 import com.railse.hiring.workforcemgmt.repository.TaskRepository;
 import com.railse.hiring.workforcemgmt.service.TaskManagementService;
 
@@ -26,9 +32,15 @@ import com.railse.hiring.workforcemgmt.service.TaskManagementService;
 public class TaskManagementServiceImpl implements TaskManagementService {
 	 private final TaskRepository taskRepository;
 	   private final ITaskManagementMapper taskMapper;
+	    private final TaskCommentRepository commentRepository;
+	    private final TaskActivityLogRepository activityLogRepository;
 
 
-	   public TaskManagementServiceImpl(TaskRepository taskRepository, ITaskManagementMapper taskMapper) {
+	   public TaskManagementServiceImpl(TaskRepository taskRepository, ITaskManagementMapper taskMapper,
+	                                    TaskCommentRepository commentRepository,
+	                                    TaskActivityLogRepository activityLogRepository) {
+		   	       this.commentRepository = commentRepository;
+		   	       	       this.activityLogRepository = activityLogRepository;
 	       this.taskRepository = taskRepository;
 	       this.taskMapper = taskMapper;
 	   }
@@ -38,7 +50,14 @@ public class TaskManagementServiceImpl implements TaskManagementService {
 	   public TaskManagementDto findTaskById(Long id) {
 	       TaskManagement task = taskRepository.findById(id)
 	               .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + id));
-	       return taskMapper.modelToDto(task);
+	       TaskManagementDto dto = taskMapper.modelToDto(task);
+	       dto.setComments(commentRepository.findByTaskId(id));
+	       dto.setActivityLogs(activityLogRepository.findByTaskId(id)
+	           .stream()
+	           .sorted(Comparator.comparing(TaskActivityLog::getTimestamp))
+	           .collect(Collectors.toList())
+	       );
+	       return dto;
 	   }
 
 
@@ -55,8 +74,11 @@ public class TaskManagementServiceImpl implements TaskManagementService {
 	           newTask.setTaskDeadlineTime(item.getTaskDeadlineTime());
 	           newTask.setStatus(TaskStatus.ASSIGNED);
 	           newTask.setDescription("New task created.");
-	           createdTasks.add(taskRepository.save(newTask));
+	           TaskManagement savedTask = taskRepository.save(newTask);
+	           createdTasks.add(savedTask);
+		       logActivity(savedTask.getId(), "Task created and assigned to user " + savedTask.getAssigneeId());
 	       }
+
 	       return taskMapper.modelListToDtoList(createdTasks);
 	   }
 
@@ -65,18 +87,31 @@ public class TaskManagementServiceImpl implements TaskManagementService {
 	   public List<TaskManagementDto> updateTasks(UpdateTaskRequest updateRequest) {
 	       List<TaskManagement> updatedTasks = new ArrayList<>();
 	       for (UpdateTaskRequest.RequestItem item : updateRequest.getRequests()) {
-	           TaskManagement task = taskRepository.findById(item.getTaskId())
-	                   .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + item.getTaskId()));
+	    	    TaskManagement task = taskRepository.findById(item.getTaskId())
+	    	        .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + item.getTaskId()));
 
+	    	    boolean updated = false;
+	    	    StringBuilder changes = new StringBuilder("Updated task: ");
 
-	           if (item.getTaskStatus() != null) {
-	               task.setStatus(item.getTaskStatus());
-	           }
-	           if (item.getDescription() != null) {
-	               task.setDescription(item.getDescription());
-	           }
-	           updatedTasks.add(taskRepository.save(task));
-	       }
+	    	    if (item.getTaskStatus() != null && task.getStatus() != item.getTaskStatus()) {
+	    	        changes.append("Status changed from ").append(task.getStatus())
+	    	               .append(" to ").append(item.getTaskStatus()).append(". ");
+	    	        task.setStatus(item.getTaskStatus());
+	    	        updated = true;
+	    	    }
+	    	    if (item.getDescription() != null && !item.getDescription().equals(task.getDescription())) {
+	    	        changes.append("Description updated. ");
+	    	        task.setDescription(item.getDescription());
+	    	        updated = true;
+	    	    }
+	    	    TaskManagement savedTask = taskRepository.save(task);
+	    	    updatedTasks.add(savedTask);
+	    	    
+	    	    if (updated) {
+	    	        logActivity(savedTask.getId(), changes.toString());
+	    	    }
+	    	}
+
 	       return taskMapper.modelListToDtoList(updatedTasks);
 	   }
 
@@ -142,6 +177,7 @@ public class TaskManagementServiceImpl implements TaskManagementService {
 	                       task.setStatus(TaskStatus.CANCELLED);
 	                       task.setDescription("Cancelled due to reassignment.");
 	                       taskRepository.save(task);
+	                       logActivity(task.getId(), "Task reassigned. Cancelled assignment for user " + task.getAssigneeId());
 	                   }
 	               }
 	           } else {
@@ -151,6 +187,7 @@ public class TaskManagementServiceImpl implements TaskManagementService {
 	                       task.setStatus(TaskStatus.CANCELLED);
 	                       task.setDescription("Cancelled due to reassignment.");
 	                       taskRepository.save(task);
+	                       logActivity(task.getId(), "Task reassigned. Cancelled assignment for user " + task.getAssigneeId());
 	                   }
 	               }
 	               TaskManagement newTask = new TaskManagement();
@@ -161,6 +198,7 @@ public class TaskManagementServiceImpl implements TaskManagementService {
 	               newTask.setStatus(TaskStatus.ASSIGNED);
 	               newTask.setDescription("Task assigned to new assignee.");
 	               taskRepository.save(newTask);
+	               logActivity(newTask.getId(), "Task reassigned to user " + request.getAssigneeId());
 	           }
 	       }
 
@@ -231,7 +269,14 @@ public class TaskManagementServiceImpl implements TaskManagementService {
 	   @Override
 	   public List<TaskManagementDto> findAllTasks() {
 	       List<TaskManagement> allTasks = taskRepository.findAll();
-	       return taskMapper.modelListToDtoList(allTasks);
+	       List<TaskManagementDto> dtos = taskMapper.modelListToDtoList(allTasks);
+
+	       for (TaskManagementDto dto : dtos) {
+	           dto.setComments(commentRepository.findByTaskId(dto.getId()));
+	           dto.setActivityLogs(activityLogRepository.findByTaskId(dto.getId()));
+	       }
+
+	       return dtos;
 	   }
 	   
 	   @Override
@@ -241,6 +286,27 @@ public class TaskManagementServiceImpl implements TaskManagementService {
 	   }
 	   
 	   
+	   @Override
+	   public List<TaskManagementDto> getTasksByReferenceIdAndType(Long referenceId, ReferenceType referenceType) {
+	       List<TaskManagement> tasks = taskRepository.findByReferenceIdAndReferenceType(referenceId, referenceType);
+	       System.out.println("Tasks found: " + tasks.size());
+	       List<TaskManagementDto> dtos = taskMapper.modelListToDtoList(tasks);
+	       System.out.println("Mapped DTOs size: " + dtos.size());
+
+	       for (TaskManagementDto dto : dtos) {
+	    	    List<TaskComment> comments = commentRepository.findByTaskId(dto.getId());
+	    	    System.out.println("Comments for task " + dto.getId() + ": " + comments.size());
+	    	    dto.setComments(comments);
+
+	    	    List<TaskActivityLog> logs = activityLogRepository.findByTaskId(dto.getId());
+	    	    System.out.println("Activity logs for task " + dto.getId() + ": " + logs.size());
+	    	    dto.setActivityLogs(logs);
+	    	}
+
+	       return dtos;
+	   }
+
+	   
 	   //Feature 2
 	   @Override
 	   public String updateTaskPriority(TaskPriorityUpdateRequest request) {
@@ -249,7 +315,10 @@ public class TaskManagementServiceImpl implements TaskManagementService {
 
 	       task.setPriority(request.getPriority());
 	       taskRepository.save(task);
+	       logActivity(task.getId(), "Priority changed to " + request.getPriority());
+
 	       return "Task priority updated successfully.";
+	       
 	   }
 
 	   @Override
@@ -257,7 +326,33 @@ public class TaskManagementServiceImpl implements TaskManagementService {
 	       List<TaskManagement> tasks = taskRepository.findByPriority(priority);
 	       return taskMapper.modelListToDtoList(tasks);
 	   }
+	   
+	   //Feature 3
+	   private void logActivity(Long taskId, String message) {
+	        TaskActivityLog log = new TaskActivityLog();
+	        log.setTaskId(taskId);
+	        log.setMessage(message);
+	        log.setTimestamp(System.currentTimeMillis());
+	        activityLogRepository.save(log);
+	    }
 
+	   @Override
+	   public String addComment(Long taskId, Long AssigneeId, String commentText) {
+	       TaskManagement task = taskRepository.findById(taskId)
+	           .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + taskId));
 
+	       TaskComment comment = new TaskComment();
+	       comment.setTaskId(taskId);
+	       comment.setAssigneeId(AssigneeId);
+	       comment.setComment(commentText);
+	       comment.setTimestamp(System.currentTimeMillis());
+	       commentRepository.save(comment);
+
+	       logActivity(taskId, "User " +AssigneeId + " added a comment.");
+	       
+	       return "Comment added successfully.";
+	   }
+	   
+	   
 
 }

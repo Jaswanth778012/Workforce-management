@@ -1,5 +1,7 @@
 package com.railse.hiring.workforcemgmt.model;
 
+import java.util.List;
+
 import com.railse.hiring.worforcemgmt.common.model.enums.Priority;
 import com.railse.hiring.worforcemgmt.common.model.enums.ReferenceType;
 import com.railse.hiring.worforcemgmt.common.model.enums.Task;
@@ -19,4 +21,5 @@ public class TaskManagement {
 	   private Long assigneeId; // Simplified from Entity for this assignment
 	   private Long taskDeadlineTime;
 	   private Priority priority;
+
 }

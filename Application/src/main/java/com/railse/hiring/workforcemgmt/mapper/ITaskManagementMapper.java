@@ -8,6 +8,7 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 import com.railse.hiring.workforcemgmt.dto.TaskManagementDto;
 import com.railse.hiring.workforcemgmt.model.TaskManagement;
 
+
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface ITaskManagementMapper {
     TaskManagementDto modelToDto(TaskManagement model);
@@ -15,4 +16,6 @@ public interface ITaskManagementMapper {
     TaskManagement dtoToModel(TaskManagementDto dto);
 
     List<TaskManagementDto> modelListToDtoList(List<TaskManagement> models);
+
+
 }
