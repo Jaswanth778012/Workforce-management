@@ -9,47 +9,47 @@ Welcome to the Workforce Management API — built as part of the **Railse Backen
 src/main/java/com/railse/workforcemgmt/
 ├── Application.java
 ├── controller/
-│ └── TaskManagementController.java
+│   └── TaskManagementController.java
 ├── service/
-│ └── TaskmanagementService.java
-├── service/impl/
-│ └── TaskmanagementServiceImpl.java
+│   ├── TaskmanagementService.java
+│   └── impl/
+│       └── TaskmanagementServiceImpl.java
 ├── model/
-│ ├── TaskManagement.java
-│ ├── TaskComment.java
-│ └── TaskActivityLog.java
+│   ├── TaskManagement.java
+│   ├── TaskComment.java
+│   └── TaskActivityLog.java
 ├── dto/
-│ ├── TaskManagementDto.java
-│ ├── TaskCreateRequest.java
-│ ├── UpdateTaskRequest.java
-│ ├── AssignByReferenceRequest.java
-│ ├── TaskPriorityUpdateRequest.java
-│ ├── TaskCommentRequedt.java
-│ └── TaskFetchByDateRequest.java
+│   ├── TaskManagementDto.java
+│   ├── TaskCreateRequest.java
+│   ├── UpdateTaskRequest.java
+│   ├── AssignByReferenceRequest.java
+│   ├── TaskPriorityUpdateRequest.java
+│   ├── TaskCommentRequest.java
+│   └── TaskFetchByDateRequest.java
 ├── enums/
-│ ├── TaskStatus.java
-│ ├── Priority.java
-│ ├── Task.java
-│ └── ReferenceType.java
-├── common/exception/
-│ ├── customExceptionHandler.java
-│ ├── ResourceNotFoundException.java
-│ └── StatusCode.java
-├── common/model/response
-│ ├── pagination.java
-│ ├── Response.java
-│ └── ResponseStatus.java
+│   ├── TaskStatus.java
+│   ├── Priority.java
+│   ├── Task.java
+│   └── ReferenceType.java
+├── common/
+│   ├── exception/
+│   │   ├── CustomExceptionHandler.java
+│   │   ├── ResourceNotFoundException.java
+│   │   └── StatusCode.java
+│   └── model/
+│       └── response/
+│           ├── Pagination.java
+│           ├── Response.java
+│           └── ResponseStatus.java
 ├── mapper/
-│ └── ITaskManagementMapper.java
-├── dto/
-│ ├── InMemoryTaskActivityRepository.java
-│ ├── InMemoryTaskCommentRepository.java
-│ ├── InMemoryTaskRepository.java
-│ ├── TaskActivityLogRepository.java
-│ ├── TaskCommentRepository.java
-└── TaskRepository.java
-
-
+│   └── ITaskManagementMapper.java
+├── repository/
+│   ├── InMemoryTaskActivityRepository.java
+│   ├── InMemoryTaskCommentRepository.java
+│   ├── InMemoryTaskRepository.java
+│   ├── TaskActivityLogRepository.java
+│   ├── TaskCommentRepository.java
+│   └── TaskRepository.java
 
 ---
 
@@ -66,7 +66,7 @@ src/main/java/com/railse/workforcemgmt/
 
 ## 🚀 How to Run
 
-```bash
+
 # Clone the repository
 git clone https://github.com/your-username/railse-workforce-mgmt-api.git
 cd railse-workforce-mgmt-api
@@ -83,7 +83,7 @@ Fix: Existing tasks are now marked as CANCELLED before assigning a new one.
 ✅ Bug 2: Cancelled Tasks Clutter the View
 Problem: The /fetch-by-date endpoint included cancelled tasks.
 Fix: Cancelled tasks are now excluded from fetch results.
-
+---
 ✨ New Features
 🔍 Feature 1: Smart Daily Task View
 Enhanced the /fetch-smart endpoint to return:
@@ -125,7 +125,7 @@ POST /task-mgmt/task/comment adding comment to task Id
 Name: Pothina Venkata Sai Jaswanth Kumar
 Email: pothinajaswanthkumar@gmail.com
 GitHub: [github.com/Jaswanth778012]
-
+---
 ✅ Submission Checklist
  Project set up using Spring Boot with proper structure
 
