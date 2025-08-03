@@ -5,7 +5,7 @@ Welcome to the Workforce Management API — built as part of the **Railse Backen
 ---
 
 ## 📁 Project Structure
-
+```
 src/main/java/com/railse/workforcemgmt/
 ├── Application.java
 ├── controller/
@@ -50,7 +50,7 @@ src/main/java/com/railse/workforcemgmt/
 │   ├── TaskActivityLogRepository.java
 │   ├── TaskCommentRepository.java
 │   └── TaskRepository.java
-
+```
 ---
 
 ## 🧰 Tech Stack
